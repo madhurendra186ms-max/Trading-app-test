@@ -20,6 +20,8 @@ Provides the dashboard with a stable, browser-facing API that aggregates the liv
 | 2 | `Set-Location 'd:\Databricks\options-trading-app\api-gateway'; python -m venv .venv` | Created this service's private `.venv`. |
 | 3 | `.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt` | Installed FastAPI 0.141.1, Uvicorn 0.52.4, Pydantic 2.13.5, HTTPX 0.28.1, python-dotenv 1.2.3, and pytest 8.4.2. |
 | 4 | `.\.venv\Scripts\python.exe -m pytest tests -q` | `2 passed in 0.86s`. |
+| 5 | `.\.venv\Scripts\python.exe -m pytest tests -q` after local-origin CORS update | `3 passed in 0.52s`. |
+| 6 | Browser-origin `GET /v1/dashboard` using `Origin: http://localhost:8010` | Returned `200`; `Access-Control-Allow-Origin` matched `http://localhost:8010`. |
 
 ## First Run
 | Step | Command | Verified result |
@@ -43,3 +45,4 @@ The service-local `.env` configures upstream service URLs and `DASHBOARD_ORIGIN`
 ## Limits
 - This MVP uses REST aggregation. Browser WebSocket fanout and rate limiting are later additions.
 - User accounts and persistent watchlists/alerts are out of scope until persistent storage is added.
+- CORS permits the configured `127.0.0.1:8010` origin and its local `localhost:8010` equivalent.

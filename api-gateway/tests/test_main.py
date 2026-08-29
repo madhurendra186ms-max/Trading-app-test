@@ -58,3 +58,19 @@ async def test_projection_forwards_all_request_parameters(monkeypatch: pytest.Mo
     assert response.status_code == 200
     assert captured["quantity"] == 2
     assert captured["underlying_at_expiry"] == 25000.0
+
+
+@pytest.mark.anyio
+async def test_dashboard_localhost_origin_is_allowed() -> None:
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.options(
+            "/v1/dashboard",
+            headers={
+                "Origin": "http://localhost:8010",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:8010"

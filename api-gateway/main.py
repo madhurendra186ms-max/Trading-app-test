@@ -10,9 +10,12 @@ from config import DASHBOARD_ORIGIN
 from models import DashboardOverview, ServiceHealth
 
 app = FastAPI(title="api-gateway", version="0.1.0")
+allowed_origins = [DASHBOARD_ORIGIN]
+if "127.0.0.1" in DASHBOARD_ORIGIN:
+    allowed_origins.append(DASHBOARD_ORIGIN.replace("127.0.0.1", "localhost"))
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[DASHBOARD_ORIGIN],
+    allow_origins=allowed_origins,
     allow_credentials=False,
     allow_methods=["GET"],
     allow_headers=[],

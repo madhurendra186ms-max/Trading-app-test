@@ -4,7 +4,7 @@
 - Base URL: `http://127.0.0.1:8009`
 - Protocol and format: HTTP with JSON responses
 - Authentication: none for local MVP
-- Allowed browser origin: `http://127.0.0.1:8010` by default
+- Allowed browser origins: `http://127.0.0.1:8010` and `http://localhost:8010` by default
 - Interactive API: `GET /docs`
 - OpenAPI schema: `GET /openapi.json`
 
