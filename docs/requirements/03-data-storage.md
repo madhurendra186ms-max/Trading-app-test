@@ -1,25 +1,26 @@
 # Module 3 — Data Storage
 
 ## Purpose
-Persist raw, time-series, and relational data efficiently.
+Provide optional persistence only for features that need data beyond the live session.
 
 ## Responsibilities
-- Schema design for Postgres (metadata), ClickHouse (tick/time-series), Redis
-  (hot cache), object storage (raw feed archive).
+- Keep the MVP live option chain in application memory. Add Redis for shared live state
+  or restart recovery, and durable storage only for saved or historical data.
 
 ## Functional Requirements
-- FR1: Postgres tables: index_master, strike_master, expiry_master, watchlist, users.
-- FR2: ClickHouse tables: option_chain_snapshot, historical_option_chain, iv_surface.
-- FR3: Redis: latest tick per contract, latest score per contract.
-- FR4: Object storage: raw feed dumps for replay/audit.
+- FR1: Do not require a database for the live-only MVP.
+- FR2: Optionally use Redis for latest tick and score per contract when multiple workers
+  or restart recovery is required.
+- FR3: Add PostgreSQL when users, watchlists, alert rules, or audit records must persist.
+- FR4: Add ClickHouse or object storage when historical research/backtesting is enabled.
 
 ## Non-Functional Requirements
-- NFR1: Retention policy per table (e.g., raw ticks N days hot, archived cold).
-- NFR2: Backup/restore procedure documented and tested.
+- NFR1: The live-only MVP must operate without durable storage.
+- NFR2: Once durable storage is enabled, define retention and test backup/restore.
 
 ## Inputs / Outputs
-- Input: normalized ticks (Module 2/5), historical data (Module 4).
-- Output: queryable datasets for Scoring, API, Backtesting modules.
+- Input: live ticks and optional historical/user data.
+- Output: optional Redis live cache and durable datasets for persistence features.
 
 ## Dependencies
-- Module 1.
+- Module 1; enabled only when a persistence feature requires it.

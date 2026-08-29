@@ -18,7 +18,8 @@ Analyze 20 years of historical data to rank and select top 3-5 liquid indexes.
 
 ## Inputs / Outputs
 - Input: 20-year historical index/options data.
-- Output: ranked top-5 index list stored in Postgres.
+- Output: ranked top-5 index list available to the live service; persist it in
+  PostgreSQL only when history or scheduled reuse is required.
 
 ## Dependencies
-- Module 3 (historical data store).
+- Historical input files or Module 3 when historical data must be retained.

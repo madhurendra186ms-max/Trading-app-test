@@ -8,9 +8,11 @@ Notify users when contracts match saved criteria.
   notifications.
 
 ## Functional Requirements
-- FR1: User-defined rule builder (e.g., spread < X, score > Y, index = Z).
+- FR1: Support session-only alert rules for the MVP (e.g., spread < X, score > Y,
+  index = Z).
 - FR2: Rule evaluation on each score update.
 - FR3: Delivery via WebSocket push, email, or webhook.
+- FR4: Persist alert rules only when users need them after logout or restart.
 
 ## Non-Functional Requirements
 - NFR1: No duplicate alert spam (dedup/cooldown window).
@@ -20,4 +22,4 @@ Notify users when contracts match saved criteria.
 - Output: notifications delivered to user via API/WebSocket/email/webhook.
 
 ## Dependencies
-- Module 6, Module 7, Module 9.
+- Module 6, Module 7, Module 9; Module 3 only for persistent rules/history.

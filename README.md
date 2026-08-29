@@ -8,10 +8,15 @@ liquidity/risk-reward scoring and historical index-selection engine.
 
 ## Stack
 - Infra: OpenStack + K3s (free, self-hosted)
-- Backend: FastAPI (Python), WebSockets
-- Messaging: Kafka / Redpanda
-- Storage: PostgreSQL, ClickHouse, Redis, MinIO/Ceph
+- Backend: FastAPI (Python), WebSockets, Kite Connect WebSocket
+- Live state: in-memory option chain; Redis only when restart recovery or multiple workers is needed
+- Optional persistence: PostgreSQL for users/watchlists/alerts; ClickHouse or object storage for history/backtesting
 - Frontend: React + TypeScript
+
+## Storage Approach
+- The first live dashboard does not require a database.
+- Add a database only when the application needs data to survive restarts, user settings,
+  historical research, or backtesting.
 
 ## Structure
 - `docs/architecture.md` — system architecture & data flow diagrams
