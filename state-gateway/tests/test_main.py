@@ -75,3 +75,20 @@ async def test_unknown_instrument_returns_not_found(app_client: tuple[httpx.Asyn
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Instrument was not found"}
+
+
+@pytest.mark.anyio
+async def test_top_indexes_are_ranked_by_total_current_option_volume(app_client: tuple[httpx.AsyncClient, httpx.ASGITransport]) -> None:
+    client, _ = app_client
+    async with client:
+        nifty = tick_payload(datetime.now(timezone.utc))
+        bank_nifty = tick_payload(datetime.now(timezone.utc))
+        bank_nifty["instrument"] = "NFO:BANKNIFTY26SEP56000CE"
+        bank_nifty["index"] = "BANK NIFTY"
+        bank_nifty["volume"] = 3_000_000
+        await client.post("/v1/ticks", json=nifty)
+        await client.post("/v1/ticks", json=bank_nifty)
+        response = await client.get("/v1/indexes/top-volume")
+
+    assert response.status_code == 200
+    assert response.json()[0] == {"index": "BANK NIFTY", "option_volume": 3_000_000}

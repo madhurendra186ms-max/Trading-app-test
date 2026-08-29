@@ -1,6 +1,6 @@
 from fastapi import APIRouter, FastAPI, HTTPException, Request, status
 
-from models import MarketTick, ServiceHealth, StateSummary
+from models import IndexVolume, MarketTick, ServiceHealth, StateSummary
 from store import TickStore
 
 
@@ -31,6 +31,13 @@ def create_app() -> FastAPI:
     @router.get("/state", response_model=StateSummary)
     def state_summary(request: Request) -> StateSummary:
         return StateSummary(instruments=request.app.state.tick_store.count())
+
+    @router.get("/indexes/top-volume", response_model=list[IndexVolume])
+    def top_indexes_by_volume(request: Request) -> list[IndexVolume]:
+        return [
+            IndexVolume(index=index, option_volume=option_volume)
+            for index, option_volume in request.app.state.tick_store.top_indexes_by_volume(limit=5)
+        ]
 
     app.include_router(router)
     return app

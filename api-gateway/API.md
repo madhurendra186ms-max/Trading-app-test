@@ -13,6 +13,7 @@
 | Method | Path | Request data | Success response | Purpose |
 |---|---|---|---|---|
 | `GET` | `/health` | None | `200 OK` | Checks gateway availability. |
+| `GET` | `/v1/indexes/top-volume` | None | `200 OK` | Proxies up to five observed indexes ranked by option volume. |
 | `GET` | `/v1/dashboard` | `index`, `expiry` query parameters | `200 OK` | Aggregates chain, rankings, and active rule count. |
 | `GET` | `/v1/projections` | Projection query parameters | `200 OK` | Proxies a selected-contract projection. |
 
@@ -25,6 +26,19 @@
   "service": "api-gateway",
   "status": "ok"
 }
+```
+
+## `GET /v1/indexes/top-volume`
+
+Returns up to five indexes ranked by current option volume from State Gateway. It is the source
+for the Dashboard index selector, not a historical 20-year liquidity ranking.
+
+### `200 OK` Response
+
+```json
+[
+  { "index": "NIFTY 50", "option_volume": 4220000 }
+]
 ```
 
 ## `GET /v1/dashboard`

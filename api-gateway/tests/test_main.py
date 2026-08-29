@@ -74,3 +74,17 @@ async def test_dashboard_localhost_origin_is_allowed() -> None:
 
     assert response.status_code == 200
     assert response.headers["access-control-allow-origin"] == "http://localhost:8010"
+
+
+@pytest.mark.anyio
+async def test_top_indexes_proxy_returns_state_gateway_rankings(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def top_indexes() -> list[dict[str, object]]:
+        return [{"index": "NIFTY 50", "option_volume": 4220000}]
+
+    monkeypatch.setattr(main, "fetch_top_indexes", top_indexes)
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/v1/indexes/top-volume")
+
+    assert response.status_code == 200
+    assert response.json() == [{"index": "NIFTY 50", "option_volume": 4220000}]

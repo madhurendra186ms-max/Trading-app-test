@@ -16,6 +16,7 @@
 | `GET` | `/v1/ticks` | None | `200 OK` | Lists latest ticks sorted by instrument. |
 | `GET` | `/v1/ticks/{instrument}` | Instrument path parameter | `200 OK` | Returns one latest tick. |
 | `GET` | `/v1/state` | None | `200 OK` | Returns live state summary. |
+| `GET` | `/v1/indexes/top-volume` | None | `200 OK` | Lists up to five indexes ranked by observed option volume. |
 
 ## `GET /health`
 
@@ -121,6 +122,25 @@ Returns one `MarketTick` object.
 | Field | Type | Description |
 |---|---|---|
 | `instruments` | integer | Count of instruments stored in the running process. |
+
+## `GET /v1/indexes/top-volume`
+
+### Request
+- Headers, path parameters, query parameters, and body: none
+
+### `200 OK` Response
+
+```json
+[
+  {
+    "index": "NIFTY 50",
+    "option_volume": 4220000
+  }
+]
+```
+
+`option_volume` is the sum of current CE and PE tick volumes for each index. The endpoint returns
+at most five indexes and only includes indexes currently ingested into this running service.
 
 ## Errors
 

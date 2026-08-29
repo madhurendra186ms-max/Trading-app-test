@@ -6,6 +6,7 @@ Provides the dashboard with a stable, browser-facing API that aggregates the liv
 ## Interface
 - Port: `8009`
 - Health: `GET /health`
+- Index ranking: `GET /v1/indexes/top-volume`
 - Dashboard: `GET /v1/dashboard?index={index}&expiry={expiry}`
 - Projection: `GET /v1/projections?index={index}&expiry={expiry}&instrument={instrument}`
 - Upstream: Option Chain (`8005`), Scoring (`8006`), Risk Projection (`8007`), Alerting (`8008`)
@@ -22,6 +23,8 @@ Provides the dashboard with a stable, browser-facing API that aggregates the liv
 | 4 | `.\.venv\Scripts\python.exe -m pytest tests -q` | `2 passed in 0.86s`. |
 | 5 | `.\.venv\Scripts\python.exe -m pytest tests -q` after local-origin CORS update | `3 passed in 0.52s`. |
 | 6 | Browser-origin `GET /v1/dashboard` using `Origin: http://localhost:8010` | Returned `200`; `Access-Control-Allow-Origin` matched `http://localhost:8010`. |
+| 7 | `.\.venv\Scripts\python.exe -m pytest tests -q` after top-volume index proxy | `4 passed in 0.58s`. |
+| 8 | `GET /v1/indexes/top-volume` after sample ticks were republished | Returned `NIFTY 50` with observed volume `4220000`. |
 
 ## First Run
 | Step | Command | Verified result |

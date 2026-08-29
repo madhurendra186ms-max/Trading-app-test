@@ -21,3 +21,9 @@ class TickStore:
 
     def count(self) -> int:
         return len(self._ticks)
+
+    def top_indexes_by_volume(self, limit: int) -> list[tuple[str, int]]:
+        totals: dict[str, int] = {}
+        for tick in self._ticks.values():
+            totals[tick.index] = totals.get(tick.index, 0) + tick.volume
+        return sorted(totals.items(), key=lambda item: item[1], reverse=True)[:limit]

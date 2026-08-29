@@ -9,6 +9,7 @@ It starts without a database; Redis is added only for multi-process state or res
 - Health: `GET /health`
 - Inbound API: `POST /v1/ticks`
 - Read API: `GET /v1/ticks`, `GET /v1/ticks/{instrument}`, `GET /v1/state`
+- Index ranking: `GET /v1/indexes/top-volume`
 - Upstream: Market Ingestion Service (`8002`)
 - Downstream: Option Chain Service (`8005`) and Scoring Service (`8006`)
 - API contract: `API.md`
@@ -22,6 +23,8 @@ It starts without a database; Redis is added only for multi-process state or res
 | 3 | `.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt` | Installed FastAPI 0.141.1, Uvicorn 0.52.4, Pydantic 2.13.5, HTTPX 0.28.1, and pytest 8.4.2. |
 | 4 | `.\.venv\Scripts\python.exe -m pytest tests -q` | `3 passed in 0.77s`. |
 | 5 | Received first `GET /v1/ticks` item from Market Ingestion through `POST /v1/ticks` | Stored `NFO:NIFTY26SEP24800CE`; `GET /v1/ticks` returned 1 current tick. |
+| 6 | `.\.venv\Scripts\python.exe -m pytest tests -q` after top-volume index ranking | `4 passed in 0.80s`. |
+| 7 | Republished both Market Ingestion sample ticks, then `GET /v1/indexes/top-volume` through API Gateway | Returned 1 observed index: `NIFTY 50` with volume `4220000`. |
 
 ## First Run
 | Step | Command | Verified result |

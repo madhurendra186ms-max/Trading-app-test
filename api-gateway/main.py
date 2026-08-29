@@ -5,7 +5,7 @@ import httpx
 from fastapi import APIRouter, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from client import fetch_option_chain, fetch_projection, fetch_rankings, fetch_rules
+from client import fetch_option_chain, fetch_projection, fetch_rankings, fetch_rules, fetch_top_indexes
 from config import DASHBOARD_ORIGIN
 from models import DashboardOverview, ServiceHealth
 
@@ -26,6 +26,14 @@ router = APIRouter(prefix="/v1", tags=["dashboard"])
 @app.get("/health", response_model=ServiceHealth, tags=["operations"])
 def health() -> ServiceHealth:
     return ServiceHealth(service="api-gateway")
+
+
+@router.get("/indexes/top-volume")
+async def top_indexes_by_volume() -> list[dict[str, Any]]:
+    try:
+        return await fetch_top_indexes()
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=503, detail="State Gateway is unavailable") from error
 
 
 @router.get("/dashboard", response_model=DashboardOverview)

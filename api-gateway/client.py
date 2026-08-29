@@ -2,7 +2,7 @@ from typing import Any
 
 import httpx
 
-from config import ALERTING_URL, OPTION_CHAIN_URL, RISK_PROJECTION_URL, SCORING_URL
+from config import ALERTING_URL, OPTION_CHAIN_URL, RISK_PROJECTION_URL, SCORING_URL, STATE_GATEWAY_URL
 
 
 async def get_json(url: str, params: dict[str, Any] | None = None) -> Any:
@@ -14,6 +14,10 @@ async def get_json(url: str, params: dict[str, Any] | None = None) -> Any:
 
 async def fetch_option_chain(index: str, expiry: str) -> dict[str, Any]:
     return await get_json(f"{OPTION_CHAIN_URL}/v1/option-chain", {"index": index, "expiry": expiry})
+
+
+async def fetch_top_indexes() -> list[dict[str, Any]]:
+    return await get_json(f"{STATE_GATEWAY_URL}/v1/indexes/top-volume")
 
 
 async def fetch_rankings(index: str, expiry: str) -> dict[str, Any]:

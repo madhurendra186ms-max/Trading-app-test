@@ -17,6 +17,7 @@ Provides the trader-facing Market Desk. It calls only API Gateway and never conn
 | 2 | `npx create-vite@latest dashboard --template react-ts --no-interactive` | Created Vite React/TypeScript dashboard scaffold. |
 | 3 | `npm install; npm install lucide-react` | Installed 29 packages; audit reported 0 vulnerabilities. |
 | 4 | `npm run build` | TypeScript and Vite production build completed successfully. |
+| 5 | `npm run build` after top-volume index selector | Production build completed successfully. |
 
 ## First Run
 | Step | Command | Verified result |
@@ -43,3 +44,4 @@ First independent run verified.
 - The desk updates when the user presses refresh; WebSocket streaming is a later addition.
 - The Prepare Trade button is intentionally non-executing.
 - Sample data appears if API Gateway is unavailable.
+- The selector ranks only indexes currently present in State Gateway. It currently has one choice because Market Ingestion supplies NIFTY 50 samples only.

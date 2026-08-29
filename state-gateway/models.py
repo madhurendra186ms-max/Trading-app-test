@@ -31,3 +31,11 @@ class ServiceHealth(BaseModel):
 
 class StateSummary(BaseModel):
     instruments: int = Field(ge=0)
+
+
+class IndexVolume(BaseModel):
+    index: str
+    option_volume: int = Field(ge=0)
+
+
+__all__ = ["IndexVolume", "MarketTick", "OptionType", "ServiceHealth", "StateSummary"]
