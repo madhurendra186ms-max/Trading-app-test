@@ -10,6 +10,7 @@ Connect adapter is configured.
 - Sample ticks: `GET /v1/ticks`
 - Dependencies: local Python environment, FastAPI; no database or external service for MVP.
 - Downstream consumer: Option Chain Service (`8005`).
+- API contract: `API.md`
 
 ## Setup Log
 | Step | Command | Verified result |

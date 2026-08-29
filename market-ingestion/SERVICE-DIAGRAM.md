@@ -21,6 +21,8 @@ flowchart LR
 | `GET /health` | Confirms that the service is running. |
 | `GET /v1/ticks` | Returns normalized sample CE/PE option ticks. |
 
+See `API.md` for request/response schemas, examples, status codes, and compatibility rules.
+
 ## Local Run
 
 ```powershell
