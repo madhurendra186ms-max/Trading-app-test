@@ -8,6 +8,8 @@ Connect adapter is configured.
 - Port: `8002`
 - Health: `GET /health`
 - Sample ticks: `GET /v1/ticks`
+- Kite login: `GET /v1/auth/kite/login`
+- Kite callback: `GET /v1/auth/kite/callback`
 - Dependencies: local Python environment, FastAPI; no database or external service for MVP.
 - Downstream consumer: Option Chain Service (`8005`).
 - API contract: `API.md`
@@ -26,6 +28,14 @@ Connect adapter is configured.
 | 9 | `Test-Path .\services\market_ingestion; Invoke-RestMethod http://127.0.0.1:8002/health` | `legacy_exists=False`; service returned `market-ingestion:ok`. |
 | 10 | `Remove-Item -Recurse -Force .\.venv, .\.pytest_cache, .\scripts, .\shared, .\services; Remove-Item -Force .\.gitignore, .\requirements.txt, .\requirements-dev.txt` | Removed obsolete root runtime, shared code, and placeholder services after Module 2 became self-contained. |
 | 11 | `Get-ChildItem -File -Force; Invoke-RestMethod http://127.0.0.1:8002/health` | Root file list contains only `README.md`; service returned `market-ingestion:ok`. |
+| 12 | `.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt; .\.venv\Scripts\python.exe -m pytest tests -q` | `python-dotenv` installed; `1 passed in 0.55s`. |
+| 13 | `.\.venv\Scripts\python.exe -c "from config import load_kite_settings; ..."` | Loaded configured redirect URL; API key, secret, and access token were blank and not displayed. |
+| 14 | PowerShell `HttpClient` redirect check | Did not run because the session had not loaded the `System.Net.Http` assembly. |
+| 15 | `.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt; .\.venv\Scripts\python.exe -m pytest tests -q` | Installed `kiteconnect`; `2 passed in 1.42s`. |
+| 16 | `Add-Type -AssemblyName System.Net.Http; ... GET /v1/auth/kite/login` | Returned `307`; redirect host was `kite.zerodha.com` without displaying query data. |
+| 17 | `.\.venv\Scripts\python.exe -m pytest tests -q; .\.venv\Scripts\python.exe -m compileall -q main.py models.py config.py` | `3 passed in 1.05s`; callback exchange behavior is validated with a fake Kite client. |
+| 18 | `Invoke-RestMethod http://127.0.0.1:8002/openapi.json` | Live schema contains `/v1/auth/kite/callback`. |
+| 19 | `Invoke-WebRequest http://127.0.0.1:8002/v1/auth/kite/callback` without query data | Returned `422`, confirming the live route is active and requires `request_token`. |
 
 ## First Run
 | Step | Command | Verified result |
@@ -47,3 +57,6 @@ First independent run verified.
 ## Configuration
 Future Kite configuration uses `KITE_API_KEY`, `KITE_API_SECRET`, and `KITE_ACCESS_TOKEN`.
 Do not record credential values in this file.
+
+The service loads `.env` from this folder at startup. The local `.env` is ignored by Git;
+fill in its values locally when Kite Connect is ready.

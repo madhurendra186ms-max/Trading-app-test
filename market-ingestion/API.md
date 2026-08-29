@@ -8,11 +8,28 @@
 - Interactive API: `GET /docs`
 - OpenAPI schema: `GET /openapi.json`
 
+## Local Configuration
+
+The application loads `.env` from this service folder on startup. Configuration is used by the
+future Kite Connect adapter and is not exposed by an API response or application logs.
+
+| Variable | Required now | Required for Kite Connect | Purpose |
+|---|---:|---:|---|
+| `KITE_API_KEY` | No | Yes | Identifies your Kite Connect application. |
+| `KITE_API_SECRET` | No | Yes | Used only by the backend to create a Kite session. |
+| `KITE_ACCESS_TOKEN` | No | Yes | Authenticates the Kite REST/WebSocket session. |
+| `KITE_REDIRECT_URL` | No | Yes | Must match the redirect URL configured in Kite Connect. |
+
+The local `.env` file is excluded from Git. Never place its secret values in requests, API
+documentation, chat, or source code.
+
 ## Endpoint Summary
 
 | Method | Path | Request data | Success response | Purpose |
 |---|---|---|---|---|
 | `GET` | `/health` | None | `200 OK` | Checks whether the service is available. |
+| `GET` | `/v1/auth/kite/login` | None | `307 Temporary Redirect` | Starts the Kite Connect authorization flow. |
+| `GET` | `/v1/auth/kite/callback` | Kite query parameters | `200 OK` | Exchanges a one-time Kite request token for an in-memory session. |
 | `GET` | `/v1/ticks` | None | `200 OK` | Returns the current normalized sample option ticks. |
 
 ## `GET /health`
@@ -54,6 +71,93 @@ Invoke-RestMethod http://127.0.0.1:8002/health
 ```bash
 curl http://127.0.0.1:8002/health
 ```
+
+## `GET /v1/auth/kite/login`
+
+Starts the Zerodha Kite Connect login flow. It does not accept or return the API secret,
+access token, password, or TOTP. The browser is redirected to Zerodha.
+
+### Request
+- Method: `GET`
+- URL: `http://127.0.0.1:8002/v1/auth/kite/login`
+- Headers: no headers required
+- Path parameters: none
+- Query parameters: none
+- Request body: none
+- Required local configuration: `KITE_API_KEY`
+
+### Success Response
+- Status: `307 Temporary Redirect`
+- Response body: empty
+- `Location` header: Kite authorization URL
+
+Open this address in a browser:
+
+```text
+http://127.0.0.1:8002/v1/auth/kite/login
+```
+
+After approval, Kite redirects the browser to the `KITE_REDIRECT_URL` configured in your
+Kite developer application, where the callback endpoint completes the daily access-token exchange.
+
+### Error Response
+
+```json
+{
+  "detail": "KITE_API_KEY is not configured"
+}
+```
+
+- Status: `503 Service Unavailable`
+- Cause: `KITE_API_KEY` is missing or empty in `.env`.
+
+## `GET /v1/auth/kite/callback`
+
+Receives the browser redirect after Kite login and exchanges Kite's one-time `request_token`
+server-side. The resulting access token is retained only in this running process and is never
+included in the response, logs, or `.env` file.
+
+### Request
+- Method: `GET`
+- URL: `http://127.0.0.1:8002/v1/auth/kite/callback`
+- Headers: no headers required
+- Request body: none
+- Query parameters:
+
+| Parameter | Type | Required | Source | Description |
+|---|---|---:|---|---|
+| `request_token` | string | Yes | Kite redirect | Short-lived token used once to establish the session. |
+| `status` | string | No | Kite redirect | Must be `success`; defaults to `success` for local API testing. |
+| `type` | string | No | Kite redirect | Informational Kite login type; ignored by this service. |
+| `action` | string | No | Kite redirect | Informational Kite action; ignored by this service. |
+
+Do not manually copy a `request_token` into chat, source code, or documentation. Open the
+login endpoint in a browser and let Kite redirect the browser to this callback automatically.
+
+### Success Response
+- Status: `200 OK`
+- Content type: `application/json`
+
+```json
+{
+  "authenticated": true,
+  "message": "Kite session established"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `authenticated` | boolean | `true` only after a Kite access token was created and retained in memory. |
+| `message` | string | Non-sensitive result message. |
+
+### Error Responses
+
+| Status | Cause | Response shape |
+|---|---|---|
+| `400 Bad Request` | Kite reports a status other than `success`. | FastAPI error JSON with `detail`. |
+| `422 Unprocessable Content` | `request_token` is absent. | FastAPI validation error JSON. |
+| `502 Bad Gateway` | Kite rejects or cannot exchange the request token. | FastAPI error JSON with a non-sensitive `detail`. |
+| `503 Service Unavailable` | `KITE_API_KEY` or `KITE_API_SECRET` is missing. | FastAPI error JSON with `detail`. |
 
 ## `GET /v1/ticks`
 
@@ -125,6 +229,7 @@ curl http://127.0.0.1:8002/v1/ticks
 |---|---|---|
 | `404 Not Found` | The method/path does not exist. | FastAPI error JSON with `detail`. |
 | `405 Method Not Allowed` | A method other than `GET` is sent to these endpoints. | FastAPI error JSON with `detail`. |
+| `503 Service Unavailable` | Required Kite configuration is missing. | FastAPI error JSON with `detail`; no secret values are returned. |
 | `500 Internal Server Error` | An unexpected server failure occurs. | Default server error response; do not depend on its exact shape. |
 
 ## Versioning and Compatibility

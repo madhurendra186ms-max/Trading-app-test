@@ -27,3 +27,8 @@ class MarketTick(BaseModel):
 class ServiceHealth(BaseModel):
     service: str
     status: str = "ok"
+
+
+class KiteAuthResult(BaseModel):
+    authenticated: bool
+    message: str

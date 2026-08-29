@@ -1,14 +1,49 @@
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
+from kiteconnect import KiteConnect
+from kiteconnect.exceptions import KiteException
 
-from models import MarketTick, OptionType, ServiceHealth
+from config import load_kite_settings
+from models import KiteAuthResult, MarketTick, OptionType, ServiceHealth
 
 app = FastAPI(title="market-ingestion", version="0.1.0")
+app.state.kite_settings = load_kite_settings()
 router = APIRouter(prefix="/v1", tags=["sample market data"])
 
 
 @app.get("/health", response_model=ServiceHealth, tags=["operations"])
 def health() -> ServiceHealth:
     return ServiceHealth(service="market-ingestion")
+
+
+@router.get("/auth/kite/login", status_code=307, tags=["kite authentication"])
+def kite_login() -> RedirectResponse:
+    settings = app.state.kite_settings
+    if not settings.api_key:
+        raise HTTPException(status_code=503, detail="KITE_API_KEY is not configured")
+
+    return RedirectResponse(url=KiteConnect(api_key=settings.api_key).login_url())
+
+
+@router.get("/auth/kite/callback", response_model=KiteAuthResult, tags=["kite authentication"])
+def kite_callback(request_token: str, status: str = "success") -> KiteAuthResult:
+    settings = app.state.kite_settings
+    if status != "success":
+        raise HTTPException(status_code=400, detail="Kite login was not successful")
+    if not settings.api_key or not settings.api_secret:
+        raise HTTPException(status_code=503, detail="Kite API configuration is incomplete")
+
+    try:
+        kite = KiteConnect(api_key=settings.api_key)
+        session = kite.generate_session(request_token, api_secret=settings.api_secret)
+        access_token = session["access_token"]
+    except (KiteException, KeyError) as error:
+        raise HTTPException(status_code=502, detail="Unable to establish Kite session") from error
+
+    kite.set_access_token(access_token)
+    app.state.kite_client = kite
+    app.state.kite_access_token = access_token
+    return KiteAuthResult(authenticated=True, message="Kite session established")
 
 
 @router.get("/ticks", response_model=list[MarketTick])
