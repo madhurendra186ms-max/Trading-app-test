@@ -36,6 +36,7 @@ Connect adapter is configured.
 | 17 | `.\.venv\Scripts\python.exe -m pytest tests -q; .\.venv\Scripts\python.exe -m compileall -q main.py models.py config.py` | `3 passed in 1.05s`; callback exchange behavior is validated with a fake Kite client. |
 | 18 | `Invoke-RestMethod http://127.0.0.1:8002/openapi.json` | Live schema contains `/v1/auth/kite/callback`. |
 | 19 | `Invoke-WebRequest http://127.0.0.1:8002/v1/auth/kite/callback` without query data | Returned `422`, confirming the live route is active and requires `request_token`. |
+| 20 | `GET /v1/ticks`, select first response item, then `POST` it to State Gateway | State Gateway stored `NFO:NIFTY26SEP24800CE`; integration flow completed. |
 
 ## First Run
 | Step | Command | Verified result |
